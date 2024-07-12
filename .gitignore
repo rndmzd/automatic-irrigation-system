@@ -1,1 +1,2 @@
-sensor/config.py
+sensor/**config.py
+controller/**config.h
