@@ -6,10 +6,14 @@
 
 const char* wifi_ssid = WIFI_SSID;
 const char* wifi_password = WIFI_PASSWORD;
+const unsigned long max_open_duration_millis = MAX_OPEN_DURATION_MILLIS;
 
 WebServer server(80);
 
 const int solenoidPin = 2;
+bool solenoidState;
+
+unsigned long solenoidOpenTime;
 
 void handlePost() {
   if (server.hasArg("plain") == false) {
@@ -26,10 +30,12 @@ void handlePost() {
     return;
   }
 
-  bool solenoidState = doc["solenoidState"];
+  solenoidState = doc["solenoidState"];
   digitalWrite(solenoidPin, solenoidState ? HIGH : LOW);
+  
+  if (solenoidState == true) solenoidOpenTime = millis();
 
-  server.send(200, "application/json", "{\"status\":\"success\"}");
+  server.send(200, "application/json", "{\"status\":\"success\",\"state\":\"" + String(solenoidState) + "\"}");
 }
 
 void reconnectWiFi() {
@@ -53,7 +59,7 @@ void setupOTA() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
-    } else { // U_SPIFFS
+    } else {  // U_SPIFFS
       type = "filesystem";
     }
     // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
@@ -94,6 +100,7 @@ void setup() {
 
   pinMode(solenoidPin, OUTPUT);
   digitalWrite(solenoidPin, LOW);
+  solenoidState = false;
 
   WiFi.begin(wifi_ssid, wifi_password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -113,10 +120,18 @@ void setup() {
 }
 
 void loop() {
-  // Handle client requests
   server.handleClient();
+
+  if (solenoidState == true) checkShutoff();
 
   ArduinoOTA.handle();
 
   reconnectWiFi();
+}
+
+void checkShutoff() {
+  if (millis() - solenoidOpenTime > max_open_duration_millis) {
+    digitalWrite(solenoidPin, LOW);
+    solenoidState = false;
+  }
 }
