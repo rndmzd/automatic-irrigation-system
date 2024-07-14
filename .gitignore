@@ -2,3 +2,4 @@ sensor/**config.py
 controller/**config.h
 controller/esp32_solenoid_controller_http/config.h
 archive/
+database/**config.ini
