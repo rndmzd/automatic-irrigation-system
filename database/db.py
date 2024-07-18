@@ -78,6 +78,19 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 logger.error(f"Error retrieving data: {str(e)}")
                 self.send_error(500, str(e))
+        elif parsed_path.path == '/config':
+            try:
+                config_data = {
+                    'apiUrl': f'http://{self.server.server_address[0]}:{self.server.server_address[1]}'
+                }
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(config_data).encode('utf-8'))
+            except Exception as e:
+                logger.error(f"Error retrieving config: {str(e)}")
+                self.send_error(500, str(e))
         else:
             self.send_error(404, 'Not Found')
 
