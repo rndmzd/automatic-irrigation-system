@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sensor Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <h1>Sensor Data Visualization</h1>
+    <canvas id="sensorChart" width="800" height="400"></canvas>
+
+    <script>
+      const ctx = document.getElementById("sensorChart").getContext("2d");
+      let chart;
+
+      function createChart(data) {
+        const timestamps = data.map((item) =>
+          new Date(item._id.$date).toLocaleString()
+        );
+        const moisture1Data = data.map((item) => item.moisture1);
+        const moisture2Data = data.map((item) => item.moisture2);
+
+        chart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: timestamps,
+            datasets: [
+              {
+                label: "Moisture 1",
+                data: moisture1Data,
+                borderColor: "rgb(75, 192, 192)",
+                tension: 0.1,
+              },
+              {
+                label: "Moisture 2",
+                data: moisture2Data,
+                borderColor: "rgb(255, 99, 132)",
+                tension: 0.1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                type: "time",
+                time: {
+                  unit: "minute",
+                },
+              },
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      function fetchData() {
+        fetch("http://localhost:8000/data")
+          .then((response) => response.json())
+          .then((data) => {
+            if (chart) {
+              chart.destroy();
+            }
+            createChart(data.reverse()); // Reverse to show oldest data first
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // Fetch data immediately and then every 5 minutes
+      fetchData();
+      setInterval(fetchData, 300000);
+    </script>
+  </body>
+</html>
