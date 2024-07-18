@@ -83,6 +83,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 config_data = {
                     'apiUrl': f'http://{self.server.server_address[0]}:{self.server.server_address[1]}'
                 }
+                logger.debug(f"config_data: {config_data}")
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
