@@ -23,7 +23,7 @@ wlan.active(True)
 def connect_to_wifi():
     if not wlan.isconnected():
         print("Connecting to WiFi...")
-        wlan.connect(ssid, password)
+        wlan.connect(wifi_ssid, wifi_password)
         while not wlan.isconnected():
             time.sleep(1)
             print(".")
