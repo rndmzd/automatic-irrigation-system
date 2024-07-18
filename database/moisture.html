@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sensor Data Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  </head>
-  <body>
+</head>
+<body>
     <h1>Sensor Data Visualization</h1>
     <canvas id="sensorChart" width="800" height="400"></canvas>
 
     <script>
-      const ctx = document.getElementById("sensorChart").getContext("2d");
-      let chart;
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+        let chart;
+        let apiUrl;
 
       function createChart(data) {
         const timestamps = data.map((item) =>
@@ -58,20 +59,33 @@
       }
 
       function fetchData() {
-        fetch("http://localhost:8000/data")
-          .then((response) => response.json())
-          .then((data) => {
-            if (chart) {
-              chart.destroy();
-            }
-            createChart(data.reverse()); // Reverse to show oldest data first
-          })
-          .catch((error) => console.error("Error:", error));
-      }
+            fetch(`${apiUrl}/data`)
+                .then(response => response.json())
+                .then(data => {
+                    if (chart) {
+                        chart.destroy();
+                    }
+                    createChart(data.reverse());  // Reverse to show oldest data first
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
-      // Fetch data immediately and then every 5 minutes
-      fetchData();
-      setInterval(fetchData, 300000);
+        function loadConfig() {
+            // Assume the config endpoint is on the same server as this HTML file
+            const configUrl = new URL('/config', window.location.href);
+            
+            fetch(configUrl)
+                .then(response => response.json())
+                .then(config => {
+                    apiUrl = config.apiUrl;
+                    fetchData();
+                    setInterval(fetchData, 300000);  // Fetch every 5 minutes
+                })
+                .catch(error => console.error('Error loading config:', error));
+        }
+
+        // Load config and start fetching data
+        loadConfig();
     </script>
-  </body>
+</body>
 </html>
