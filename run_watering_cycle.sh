@@ -24,7 +24,7 @@ JSON_DATA='{"solenoidState": true}'
 curl -X POST \
      -H "Content-Type: application/json" \
      -d "$JSON_DATA" \
-     "$SOLENOID_CONTROLLER_HOST"
+     "${SOLENOID_CONTROLLER_HOST}/control"
 
 if [ $? -eq 0 ]; then
     echo "Watering cycle triggered successfully."
