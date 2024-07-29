@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sensor Data Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Sensor Data Visualization</h1>
     <canvas id="sensorChart" width="800" height="400"></canvas>
 
     <script>
-        const ctx = document.getElementById('sensorChart').getContext('2d');
-        let chart;
-        let apiUrl = 'http://localhost:8000';
+      const ctx = document.getElementById("sensorChart").getContext("2d");
+      let chart;
+      let apiUrl = "http://localhost:8000";
 
       function createChart(data) {
         const timestamps = data.map((item) =>
@@ -59,21 +59,21 @@
       }
 
       function fetchData() {
-            fetch(`${apiUrl}/data`)
-                .then(response => response.json())
-                .then(data => {
-                    if (chart) {
-                        chart.destroy();
-                    }
-                    createChart(data.reverse());  // Reverse to show oldest data first
-                })
-                .catch(error => console.error('Error:', error));
-        }
+        fetch(`${apiUrl}/data`)
+          .then((response) => response.json())
+          .then((data) => {
+            if (chart) {
+              chart.destroy();
+            }
+            createChart(data.reverse()); // Reverse to show oldest data first
+          })
+          .catch((error) => console.error("Error:", error));
+      }
 
-        fetchData();
+      fetchData();
 
-        const refreshInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
-        setInterval(fetchData, refreshInterval);
+      const refreshInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+      setInterval(fetchData, refreshInterval);
     </script>
-</body>
+  </body>
 </html>
