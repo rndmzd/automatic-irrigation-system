@@ -16,26 +16,27 @@
       let chart;
       let apiUrl = "http://localhost:8000";
 
-      function createChart(data) {
-        const timestamps = data
-          .map((item) => {
-            const date = new Date(item.date);
-            if (isNaN(date.getTime())) {
-              console.error("Invalid date:", item.date);
-              return null;
-            }
-            return date;
-          })
-          .filter((date) => date !== null);
+      function parseDate(dateObj) {
+        if (dateObj && dateObj.$date) {
+          return new Date(dateObj.$date);
+        }
+        return null;
+      }
 
-        const moisture1Data = data.map((item) => ({
-          x: new Date(item.date),
-          y: item.moisture1,
-        }));
-        const moisture2Data = data.map((item) => ({
-          x: new Date(item.date),
-          y: item.moisture2,
-        }));
+      function createChart(data) {
+        const moisture1Data = data
+          .map((item) => {
+            const date = parseDate(item.date);
+            return date ? { x: date, y: item.moisture1 } : null;
+          })
+          .filter((point) => point !== null);
+
+        const moisture2Data = data
+          .map((item) => {
+            const date = parseDate(item.date);
+            return date ? { x: date, y: item.moisture2 } : null;
+          })
+          .filter((point) => point !== null);
 
         chart = new Chart(ctx, {
           type: "line",
