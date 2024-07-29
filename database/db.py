@@ -19,7 +19,9 @@ client = MongoClient(
     port=config.getint('MongoDB', 'port'),
 )
 db = client[config.get('MongoDB', 'db')]
-collection = db[config.get('MongoDB', 'collection')]
+collection_data = db[config.get('MongoDB', 'collection_data')]
+collection_view = db[config.get('MongoDB', 'collection_view')]
+
 
 
 class RequestHandler(BaseHTTPRequestHandler):
@@ -31,7 +33,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             json_data = json.loads(post_data.decode('utf-8'))
             logger.info(f'Received data: {json_data}')
             
-            result = collection.insert_one(json_data)
+            result = collection_data.insert_one(json_data)
             logger.debug(f"result.inserted_id: {result.inserted_id}")
             
             self.send_response(200)
@@ -48,8 +50,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         if parsed_path.path == '/latest':
             try:
-                # Retrieve the latest document
-                latest_doc = collection.find_one(sort=[('_id', -1)])
+                latest_doc = collection_view.find_one(sort=[('_id', -1)])
                 
                 if latest_doc:
                     self.send_response(200)
@@ -65,13 +66,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_error(500, str(e))
         elif parsed_path.path == '/data':
             try:
-                # Retrieve all documents, sorted by _id in descending order
-                cursor = collection.find().sort('_id', -1).limit(100)  # Limit to last 100 entries
+                cursor = collection_view.find().sort('_id', -1)#.limit(100)
                 data = list(cursor)
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')  # Allow any origin
+                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 # Use json_util to handle ObjectId serialization
                 self.wfile.write(json_util.dumps(data).encode('utf-8'))
