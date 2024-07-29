@@ -13,7 +13,7 @@
     <script>
         const ctx = document.getElementById('sensorChart').getContext('2d');
         let chart;
-        let apiUrl;
+        let apiUrl = 'http://localhost:8000';
 
       function createChart(data) {
         const timestamps = data.map((item) =>
@@ -70,22 +70,7 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        function loadConfig() {
-            // Assume the config endpoint is on the same server as this HTML file
-            const configUrl = new URL('/config', window.location.href);
-            
-            fetch(configUrl)
-                .then(response => response.json())
-                .then(config => {
-                    apiUrl = config.apiUrl;
-                    fetchData();
-                    setInterval(fetchData, 300000);  // Fetch every 5 minutes
-                })
-                .catch(error => console.error('Error loading config:', error));
-        }
-
-        // Load config and start fetching data
-        loadConfig();
+        fetchData();
     </script>
 </body>
 </html>
