@@ -12,7 +12,7 @@ sensor2 = machine.ADC(27)
 
 watering_threshold = config.WATERING_THRESHOLD
 data_send_interval = config.DATA_SEND_INTERVAL
-solenoid_controller_ip = config.SOLENOID_CONTROLLER_IP
+solenoid_controller_host = config.SOLENOID_CONTROLLER_HOST
 
 wifi_ssid = config.WIFI_SSID
 wifi_password = config.WIFI_PASSWORD
@@ -45,7 +45,7 @@ def send_data(value1, value2):
     scaled_value2 = scale_value(value2)
     print("scaled_value2:", scaled_value2)
     
-    url = 'http://' + solenoid_controller_ip + '/control'
+    url = 'http://' + solenoid_controller_host + '/control'
     headers = {'Content-Type': 'application/json'}
     data = {
         'sensor1': scaled_value1,
