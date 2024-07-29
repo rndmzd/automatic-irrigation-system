@@ -47,7 +47,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_error(500, str(e))
     
     def do_GET(self):
-        parsed_path = urlparse(self.path)
+        request_path = self.path
+        logger.debug(f"request_path: {request_path}")
+        if '://' not in request_path:
+            request_path = 'http://' + request_path
+        parsed_path = urlparse(request_path)
+        logger.debug(f"parsed_path: {parsed_path}")
         if parsed_path.path == '/latest':
             try:
                 latest_doc = collection_view.find_one(sort=[('_id', -1)])
@@ -77,20 +82,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json_util.dumps(data).encode('utf-8'))
             except Exception as e:
                 logger.error(f"Error retrieving data: {str(e)}")
-                self.send_error(500, str(e))
-        elif parsed_path.path == '/config':
-            try:
-                config_data = {
-                    'apiUrl': f'http://{self.server.server_address[0]}:{self.server.server_address[1]}'
-                }
-                logger.debug(f"config_data: {config_data}")
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps(config_data).encode('utf-8'))
-            except Exception as e:
-                logger.error(f"Error retrieving config: {str(e)}")
                 self.send_error(500, str(e))
         else:
             self.send_error(404, 'Not Found')
