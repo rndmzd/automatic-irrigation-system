@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sensor Data Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   </head>
   <body>
     <h1>Sensor Data Visualization</h1>
@@ -13,19 +14,32 @@
     <script>
       const ctx = document.getElementById("sensorChart").getContext("2d");
       let chart;
-      const apiUrl = "http://localhost:8000";
+      let apiUrl = "http://localhost:8000";
 
       function createChart(data) {
-        const timestamps = data.map((item) =>
-          new Date(item._id.$date).toLocaleString()
-        );
-        const moisture1Data = data.map((item) => item.moisture1);
-        const moisture2Data = data.map((item) => item.moisture2);
+        const timestamps = data
+          .map((item) => {
+            const date = new Date(item.date);
+            if (isNaN(date.getTime())) {
+              console.error("Invalid date:", item.date);
+              return null;
+            }
+            return date;
+          })
+          .filter((date) => date !== null);
+
+        const moisture1Data = data.map((item) => ({
+          x: new Date(item.date),
+          y: item.moisture1,
+        }));
+        const moisture2Data = data.map((item) => ({
+          x: new Date(item.date),
+          y: item.moisture2,
+        }));
 
         chart = new Chart(ctx, {
           type: "line",
           data: {
-            labels: timestamps,
             datasets: [
               {
                 label: "Moisture 1",
@@ -70,8 +84,10 @@
           .catch((error) => console.error("Error:", error));
       }
 
+      // Initial data fetch
       fetchData();
 
+      // Set up periodic data refresh (every 5 minutes in this example)
       const refreshInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
       setInterval(fetchData, refreshInterval);
     </script>
