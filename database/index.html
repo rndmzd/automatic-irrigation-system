@@ -23,20 +23,54 @@
         return null;
       }
 
-      function createChart(data) {
-        const moisture1Data = data
-          .map((item) => {
-            const date = parseDate(item.date);
-            return date ? { x: date, y: item.moisture1 } : null;
-          })
-          .filter((point) => point !== null);
+      function aggregateData(data, intervalMinutes = 60) {
+        const aggregated = {};
 
-        const moisture2Data = data
-          .map((item) => {
-            const date = parseDate(item.date);
-            return date ? { x: date, y: item.moisture2 } : null;
-          })
-          .filter((point) => point !== null);
+        data.forEach((item) => {
+          const date = parseDate(item.date);
+          if (!date) return;
+
+          // Round down to the nearest interval
+          const roundedDate = new Date(
+            Math.floor(date.getTime() / (intervalMinutes * 60000)) *
+              (intervalMinutes * 60000)
+          );
+          const key = roundedDate.getTime();
+
+          if (!aggregated[key]) {
+            aggregated[key] = {
+              date: roundedDate,
+              moisture1: [],
+              moisture2: [],
+            };
+          }
+
+          aggregated[key].moisture1.push(item.moisture1);
+          aggregated[key].moisture2.push(item.moisture2);
+        });
+
+        return Object.values(aggregated).map((item) => ({
+          date: item.date,
+          moisture1:
+            item.moisture1.reduce((sum, val) => sum + val, 0) /
+            item.moisture1.length,
+          moisture2:
+            item.moisture2.reduce((sum, val) => sum + val, 0) /
+            item.moisture2.length,
+        }));
+      }
+
+      function createChart(data) {
+        const aggregatedData = aggregateData(data, 60); // Aggregate by hour
+
+        const moisture1Data = aggregatedData.map((item) => ({
+          x: item.date,
+          y: item.moisture1,
+        }));
+        const moisture2Data = aggregatedData.map((item) => ({
+          x: item.date,
+          y: item.moisture2,
+        }));
 
         chart = new Chart(ctx, {
           type: "line",
@@ -62,7 +96,7 @@
               x: {
                 type: "time",
                 time: {
-                  unit: "minute",
+                  unit: "hour",
                 },
               },
               y: {
