@@ -71,6 +71,9 @@
         }
 
         fetchData();
+
+        const refreshInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+        setInterval(fetchData, refreshInterval);
     </script>
 </body>
 </html>
