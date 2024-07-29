@@ -13,7 +13,7 @@
     <script>
       const ctx = document.getElementById("sensorChart").getContext("2d");
       let chart;
-      let apiUrl = "http://localhost:8000";
+      const apiUrl = "http://localhost:8000";
 
       function createChart(data) {
         const timestamps = data.map((item) =>
