@@ -28,6 +28,7 @@ curl -X POST \
 
 if [ $? -eq 0 ]; then
     echo "Watering cycle triggered successfully."
+    echo "`date`" >> ~/watering.log
 else
     echo "Failed to trigger watering cycle. Please check your API endpoint and try again."
 fi
